@@ -1,7 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 # tst.sh - build the programs on Linux.
 
-LIBS="-pthread -l m -l rt"
+if echo "$OSTYPE" | egrep -i darwin >/dev/null; then :
+  LIBS="-pthread -l m"
+else :
+  LIBS="-pthread -l m -l rt"
+fi
 
 gcc -Wall -g -o tgen_test cprt.c tgen.c tgen_test.c $LIBS
 if [ $? -ne 0 ]; then echo error in tgen.c; exit 1; fi
@@ -81,7 +85,7 @@ echo passed
 
 echo test5
 rm -f time.out
-time -p -o time.out ./tgen_test -m 99 -s "
+command time -p -o time.out ./tgen_test -m 99 -s "
 send 700 bytes 100 persec 1 sec
 set i 3
 label l
@@ -101,6 +105,8 @@ STATUS=$?
 if [ "$STATUS" -ne 0 ]; then echo failed 1; exit 1; fi
 if [ "`wc -l <tgen_test.out`" -ne 11 ]; then echo failed 2; exit 1; fi
 if egrep "my_send, 700 100 4000000" tgen_test.out >/dev/null; then :; else echo failed 3; exit 1; fi
+# Nine sleeps of 200 ms each = 1.80 seconds. Get the "real" time and
+# remove the decimal to get 180 (nominally).
 T=`sed -n 's/real \([0-9]*\)\.\([0-9]*\)$/\1\2/p' <time.out`
 if [ "$T" -lt 170 -o "$T" -gt 195 ]; then echo failed 4; exit 1; fi
 echo passed
