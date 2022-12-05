@@ -34,10 +34,16 @@ void get_my_options(int argc, char **argv)
 }  /* get_my_options */
 
 
-void my_send(int len, int rate, int duration_usec)
+void my_sendt(int len, int rate, int duration_usec)
 {
-fprintf(stderr, "my_send, %d %d %d\n", len, rate, duration_usec);
-}  /* my_send */
+fprintf(stderr, "my_sendt, %d %d %d\n", len, rate, duration_usec);
+}  /* my_sendt */
+
+
+void my_sendc(int len, int rate, int num_msgs)
+{
+fprintf(stderr, "my_sendc, %d %d %d\n", len, rate, num_msgs);
+}  /* my_sendc */
 
 
 int main(int argc, char **argv)

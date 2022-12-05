@@ -24,12 +24,13 @@ extern "C" {
 
 
 /* Valid opcodes for steps. */
-#define TGEN_OPCODE_SEND 1
-#define TGEN_OPCODE_STOP 2
-#define TGEN_OPCODE_SET 3
-#define TGEN_OPCODE_LOOP 4
-#define TGEN_OPCODE_DELAY 5
-#define TGEN_OPCODE_REPL 6
+#define TGEN_OPCODE_SENDT 1
+#define TGEN_OPCODE_SENDC 2
+#define TGEN_OPCODE_STOP 3
+#define TGEN_OPCODE_SET 4
+#define TGEN_OPCODE_LOOP 5
+#define TGEN_OPCODE_DELAY 6
+#define TGEN_OPCODE_REPL 7
 
 struct tgen_step_s {
   int index;
@@ -37,6 +38,7 @@ struct tgen_step_s {
   int len;
   int rate;
   int duration_usec;
+  int num_msgs;
   int variable_index;
   int value;
   int label_index;
@@ -69,7 +71,8 @@ void tgen_add_step(tgen_t *tgen, char *iline);
 void tgen_add_multi_steps(tgen_t *tgen, char *iline);
 void tgen_run(tgen_t *tgen);
 void tgen_run1(tgen_t *tgen, tgen_step_t *step);
-void my_send(int len, int rate, int duration_usec);
+void my_sendt(int len, int rate, int duration_usec);
+void my_sendc(int len, int rate, int msg_count);
 
 #if defined(__cplusplus)
 }

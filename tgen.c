@@ -18,7 +18,7 @@
 #include "tgen.h"
 
 
-/* Return multiplication factor, or -1 for error. */
+/* Return multiplication factor. */
 int tgen_convert_byte_multiplier(char *in_str)
 {
   if (strcmp(in_str, "bytes") == 0) return 1;
@@ -30,7 +30,7 @@ int tgen_convert_byte_multiplier(char *in_str)
 }  /* tgen_convert_byte_multiplier */
 
 
-/* Return multiplication factor, or -1 for error. */
+/* Return multiplication factor. */
 int tgen_convert_rate_multiplier(char *in_str)
 {
   if (strcmp(in_str, "persec") == 0) return 1;
@@ -42,7 +42,7 @@ int tgen_convert_rate_multiplier(char *in_str)
 }  /* tgen_convert_rate_multiplier */
 
 
-/* Return multiplication factor to give usec, or -1 for error. */
+/* Return multiplication factor to give usec. */
 int tgen_convert_duration_multiplier(char *in_str)
 {
   if (strcmp(in_str, "usec") == 0) return 1;
@@ -52,6 +52,18 @@ int tgen_convert_duration_multiplier(char *in_str)
   fprintf(stderr, "Error: invalid duration multiplier '%s'\n", in_str);
   CPRT_ERR_EXIT;
 }  /* tgen_convert_duration_multiplier */
+
+
+/* Return multiplication factor to give num msgs. */
+int tgen_convert_msgs_multiplier(char *in_str)
+{
+  if (strcmp(in_str, "msgs") == 0) return 1;
+  if (strcmp(in_str, "kmsgs") == 0) return 1000;
+  if (strcmp(in_str, "mmsgs") == 0) return 1000000;
+
+  fprintf(stderr, "Error: invalid msgs multiplier '%s'\n", in_str);
+  CPRT_ERR_EXIT;
+}  /* tgen_convert_msgs_multiplier */
 
 
 /* Return variable index 0-25 (a-z). */
@@ -84,14 +96,14 @@ int tgen_parse_comment(char *iline, tgen_step_t *step)
 }  /* tgen_parse_comment */
 
 
-int tgen_parse_send(char *iline, tgen_step_t *step)
+int tgen_parse_sendt(char *iline, tgen_step_t *step)
 {
   char byte_multiplier[TGEN_MAX_KEYWORD+1];
   char rate_multiplier[TGEN_MAX_KEYWORD+1];
   char duration_multiplier[TGEN_MAX_KEYWORD+1];
   int null_ofs = 0;
 
-  (void)sscanf(iline, " send"
+  (void)sscanf(iline, " sendt"
       " %9u %" CPRT_STRDEF(TGEN_MAX_KEYWORD) "[A-Za-z]"
       " %9u %" CPRT_STRDEF(TGEN_MAX_KEYWORD) "[A-Za-z]"
       " %9u %" CPRT_STRDEF(TGEN_MAX_KEYWORD) "[A-Za-z]"
@@ -110,10 +122,42 @@ int tgen_parse_send(char *iline, tgen_step_t *step)
 
   step->duration_usec *= tgen_convert_duration_multiplier(duration_multiplier);
 
-  step->opcode = TGEN_OPCODE_SEND;
+  step->opcode = TGEN_OPCODE_SENDT;
 
   return 1;
-}  /* tgen_parse_send */
+}  /* tgen_parse_sendt */
+
+
+int tgen_parse_sendc(char *iline, tgen_step_t *step)
+{
+  char byte_multiplier[TGEN_MAX_KEYWORD+1];
+  char rate_multiplier[TGEN_MAX_KEYWORD+1];
+  char msgs_multiplier[TGEN_MAX_KEYWORD+1];
+  int null_ofs = 0;
+
+  (void)sscanf(iline, " sendc"
+      " %9u %" CPRT_STRDEF(TGEN_MAX_KEYWORD) "[A-Za-z]"
+      " %9u %" CPRT_STRDEF(TGEN_MAX_KEYWORD) "[A-Za-z]"
+      " %9u %" CPRT_STRDEF(TGEN_MAX_KEYWORD) "[A-Za-z]"
+      " %n",
+      &step->len, byte_multiplier,
+      &step->rate, rate_multiplier,
+      &step->num_msgs, msgs_multiplier,
+      &null_ofs);
+  if (iline[null_ofs] != '\0' && iline[null_ofs] != '#') {
+    return -1;
+  }
+
+  step->len *= tgen_convert_byte_multiplier(byte_multiplier);
+
+  step->rate *= tgen_convert_rate_multiplier(rate_multiplier);
+
+  step->num_msgs *= tgen_convert_msgs_multiplier(msgs_multiplier);
+
+  step->opcode = TGEN_OPCODE_SENDC;
+
+  return 1;
+}  /* tgen_parse_sendc */
 
 
 int tgen_parse_stop(char *iline, tgen_step_t *step)
@@ -249,7 +293,8 @@ int tgen_parse_step(tgen_t *tgen, char *iline, tgen_step_t *step)
   int stat;
 
   if ((stat = tgen_parse_comment(iline, step)) >= 0) return stat;
-  if ((stat = tgen_parse_send(iline, step)) >= 0) return stat;
+  if ((stat = tgen_parse_sendt(iline, step)) >= 0) return stat;
+  if ((stat = tgen_parse_sendc(iline, step)) >= 0) return stat;
   if ((stat = tgen_parse_stop(iline, step)) >= 0) return stat;
   if ((stat = tgen_parse_set(iline, step)) >= 0) return stat;
   if ((stat = tgen_parse_label(tgen, iline, step)) >= 0) return stat;
@@ -267,9 +312,15 @@ int tgen_parse_step(tgen_t *tgen, char *iline, tgen_step_t *step)
  */
 
 
-void tgen_run_send(tgen_t *tgen, tgen_step_t *step)
+void tgen_run_sendt(tgen_t *tgen, tgen_step_t *step)
 {
-  my_send(step->len, step->rate, step->duration_usec);
+  my_sendt(step->len, step->rate, step->duration_usec);
+}  /* tgen_run_stop */
+
+
+void tgen_run_sendc(tgen_t *tgen, tgen_step_t *step)
+{
+  my_sendc(step->len, step->rate, step->num_msgs);
 }  /* tgen_run_stop */
 
 void tgen_run_stop(tgen_t *tgen, tgen_step_t *step)
@@ -325,7 +376,8 @@ void tgen_run_repl(tgen_t *tgen, tgen_step_t *step)
 void tgen_run1(tgen_t *tgen, tgen_step_t *step)
 {
   switch (step->opcode) {
-  case TGEN_OPCODE_SEND: tgen_run_send(tgen, step); break;
+  case TGEN_OPCODE_SENDT: tgen_run_sendt(tgen, step); break;
+  case TGEN_OPCODE_SENDC: tgen_run_sendc(tgen, step); break;
   case TGEN_OPCODE_STOP: tgen_run_stop(tgen, step); break;
   case TGEN_OPCODE_SET: tgen_run_set(tgen, step); break;
   case TGEN_OPCODE_LOOP: tgen_run_loop(tgen, step); break;
