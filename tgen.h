@@ -72,7 +72,7 @@ struct tgen_s {
 typedef struct tgen_s tgen_t;
 
 
-tgen_t *tgen_create(int max_steps, uint32_t flags, void *user_data);
+tgen_t *tgen_create(uint32_t flags, void *user_data);
 void tgen_delete(tgen_t *tgen);
 void *tgen_user_data_get(tgen_t *tgen);
 int tgen_variable_get(tgen_t *tgen, char var_id);

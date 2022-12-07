@@ -26,30 +26,32 @@ typedef struct my_data_s my_data_t;
 
 /* Options */
 int o_flags = 0;
-int o_max_steps = 99;
 char *o_script_str = NULL;
+int o_test_num;
 
-void usage()
+void usage(int exit_status)
 {
-  printf("Usage: tgen_test -s script_string [-m max_steps]\n");
-  exit(0);
+  printf("Usage: tgen_test [-h] [-s script_string] [-t test_num]\n");
+  exit(exit_status);
 }  /* usage */
 
 void get_my_options(int argc, char **argv)
 {
   int opt;
 
-  while ((opt = cprt_getopt(argc, argv, "f:m:s:")) != EOF) {
+  while ((opt = cprt_getopt(argc, argv, "hf:s:t:")) != EOF) {
     switch (opt) {
+      case 'h': usage(0);
       case 'f': CPRT_ATOI(cprt_optarg, o_flags); break;
-      case 'm': CPRT_ATOI(cprt_optarg, o_max_steps); break;
       case 's': o_script_str = CPRT_STRDUP(cprt_optarg); break;
-      default: usage();
+      case 't': CPRT_ATOI(cprt_optarg, o_test_num); break;
+      default: usage(1);
     }  /* switch */
   }  /* while */
 
-  if (o_script_str == NULL) {
-    usage();
+  if (o_test_num == 2 && o_script_str == NULL) {
+    fprintf(stderr, "test2 requires script\n");
+    usage(1);
   }
 }  /* get_my_options */
 
@@ -63,22 +65,53 @@ void my_send(int len, tgen_t *tgen)
 }  /* my_send */
 
 
-int main(int argc, char **argv)
+void test1()
+{
+  tgen_t *tgen;
+  int initial_max_steps;
+  int i;
+
+  tgen = tgen_create(o_flags, NULL);
+
+  initial_max_steps = tgen->script->max_steps;
+  for (i = 0; i < initial_max_steps; i++) {
+    tgen_add_step(tgen, "sendc 1 bytes 999999 mpersec 1 msgs");
+  }
+  CPRT_ASSERT(initial_max_steps == tgen->script->max_steps);
+  tgen_add_step(tgen, "sendc 1 bytes 999999 mpersec 1 msgs");
+  CPRT_ASSERT(2 * initial_max_steps == tgen->script->max_steps);
+
+  tgen_delete(tgen);
+}  /* test1 */
+
+
+void test2()
 {
   my_data_t my_data;
   tgen_t *tgen;
 
-  get_my_options(argc, argv);
-
   my_data.test_int = 314159;
 
-  tgen = tgen_create(o_max_steps, o_flags, &my_data);
+  tgen = tgen_create(o_flags, &my_data);
 
   tgen_add_multi_steps(tgen, o_script_str);
 
   tgen_run(tgen);
 
   tgen_delete(tgen);
+}  /* test2 */
+
+
+int main(int argc, char **argv)
+{
+  get_my_options(argc, argv);
+
+  switch (o_test_num) {
+    case 1: test1(); break;
+    case 2: test2(); break;
+
+    default: fprintf(stderr, "unknown test %d\n", o_test_num); exit(1);
+  }
 
   return 0;
-}
+}  /* main */

@@ -472,18 +472,20 @@ void tgen_run(tgen_t *tgen)
  * APIs
  */
 
-tgen_t *tgen_create(int max_steps, uint32_t flags, void *user_data)
+tgen_t *tgen_create(uint32_t flags, void *user_data)
 {
   tgen_t *tgen;
   tgen_script_t *script;
   tgen_step_t *steps;
+  int max_steps;
   int i;
 
-  CPRT_ENULL(tgen = malloc(sizeof(tgen_t)));
+  CPRT_ENULL(tgen = (tgen_t *)malloc(sizeof(tgen_t)));
 
-  CPRT_ENULL(script = malloc(sizeof(tgen_script_t)));
+  max_steps = 64;
+  CPRT_ENULL(script = (tgen_script_t *)malloc(sizeof(tgen_script_t)));
 
-  CPRT_ENULL(steps = malloc(max_steps * sizeof(tgen_script_t)));
+  CPRT_ENULL(steps = (tgen_step_t *)malloc(max_steps * sizeof(tgen_step_t)));
 
   for (i = 0; i < max_steps; i++) {
     steps[i].index = i;
@@ -541,6 +543,11 @@ void tgen_add_step(tgen_t *tgen, char *iline)
 {
   int status;
 
+  if (tgen->script->num_steps == tgen->script->max_steps) {
+    /* Dynamically grow the "steps" array (double). */
+    tgen->script->max_steps *= 2;
+    tgen->script->steps = (tgen_step_t *)realloc(tgen->script->steps, tgen->script->max_steps);
+  }
   CPRT_ASSERT(tgen->script->num_steps < tgen->script->max_steps);
 
   status = tgen_parse_step(tgen, iline, &tgen->script->steps[tgen->script->num_steps]);
