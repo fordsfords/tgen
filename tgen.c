@@ -314,13 +314,88 @@ int tgen_parse_step(tgen_t *tgen, char *iline, tgen_step_t *step)
 
 void tgen_run_sendt(tgen_t *tgen, tgen_step_t *step)
 {
-  my_sendt(step->len, step->rate, step->duration_usec);
-}  /* tgen_run_stop */
+  struct timespec cur_ts;
+  struct timespec start_ts;
+  uint64_t num_sent;
+  int len = step->len;
+  int rate = step->rate;
+  uint64_t duration_ns = 1000 * step->duration_usec;
+  uint64_t ns_so_far;
+
+  if (tgen->flags & TGEN_FLAGS_TST1) {
+    fprintf(stderr, "sendt, %d %d %d\n", len, rate, step->duration_usec);
+    return;
+  }
+
+  /* Send messages evenly-spaced using busy looping. Based on algorithm:
+   * http://www.geeky-boy.com/catchup/html/ */
+  CPRT_GETTIME(&start_ts);
+  cur_ts = start_ts;
+  num_sent = 0;
+  do {  /* while */
+    CPRT_DIFF_TS(ns_so_far, cur_ts, start_ts);
+    /* The +1 is because we want to send, then pause. */
+    uint64_t should_have_sent = (ns_so_far * rate)/1000000000 + 1;
+
+    /* If we are behind where we should be, get caught up. */
+    while (num_sent < should_have_sent) {
+      if (tgen->flags & TGEN_FLAGS_TST2) {
+        int i; for (i=0; i<300; i++){}
+        fprintf(stderr, "send message\n");
+      }
+      else {
+int i; for (i=0; i<300; i++){} /*???*/
+      }
+
+      num_sent++;
+    }  /* while num_sent < should_have_sent */
+    CPRT_GETTIME(&cur_ts);
+  } while (ns_so_far < duration_ns);
+}  /* tgen_run_sendt */
 
 
 void tgen_run_sendc(tgen_t *tgen, tgen_step_t *step)
 {
-  my_sendc(step->len, step->rate, step->num_msgs);
+  struct timespec cur_ts;
+  struct timespec start_ts;
+  uint64_t num_sent;
+  int len = step->len;
+  int rate = step->rate;
+  int num_msgs = step->num_msgs;
+  uint64_t ns_so_far;
+
+  if (tgen->flags & TGEN_FLAGS_TST1) {
+    fprintf(stderr, "sendc, %d %d %d\n", len, rate, num_msgs);
+    return;
+  }
+
+  /* Send messages evenly-spaced using busy looping. Based on algorithm:
+   * http://www.geeky-boy.com/catchup/html/ */
+  CPRT_GETTIME(&start_ts);
+  cur_ts = start_ts;
+  num_sent = 0;
+  do {  /* while num_sent < num_msgs */
+    CPRT_DIFF_TS(ns_so_far, cur_ts, start_ts);
+    /* The +1 is because we want to send, then pause. */
+    uint64_t should_have_sent = (ns_so_far * rate)/1000000000 + 1;
+    if (should_have_sent > num_msgs) {
+      should_have_sent = num_msgs;
+    }
+
+    /* If we are behind where we should be, get caught up. */
+    while (num_sent < should_have_sent) {
+      if (tgen->flags & TGEN_FLAGS_TST2) {
+        int i; for (i=0; i<300; i++){}
+        fprintf(stderr, "send message\n");
+      }
+      else {
+int i; for (i=0; i<300; i++){} /*???*/
+      }
+
+      num_sent++;
+    }  /* while num_sent < should_have_sent */
+    CPRT_GETTIME(&cur_ts);
+  } while (num_sent < num_msgs);
 }  /* tgen_run_stop */
 
 void tgen_run_stop(tgen_t *tgen, tgen_step_t *step)
@@ -411,7 +486,7 @@ void tgen_run(tgen_t *tgen)
  * APIs
  */
 
-tgen_t *tgen_create(int max_steps)
+tgen_t *tgen_create(int max_steps, uint32_t flags, void *user_data)
 {
   tgen_t *tgen;
   tgen_script_t *script;
@@ -438,6 +513,8 @@ tgen_t *tgen_create(int max_steps)
   for (i = 0; i < 26; i++) {
     tgen->variables[i] = 0;
   }
+  tgen->flags = flags;
+  tgen->user_data = user_data;
   tgen->pc = 0;
   tgen->script = script;
   tgen->state = TGEN_STATE_STOPPED;

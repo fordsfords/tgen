@@ -14,6 +14,8 @@
 #ifndef TGEN_H
 #define TGEN_H
 
+#include "cprt.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -51,12 +53,18 @@ struct tgen_script_s {
   int max_steps;
   tgen_step_t *steps;
 };
+
+
 typedef struct tgen_script_s tgen_script_t;
+#define TGEN_FLAGS_TST1 0x00000001  /* set during first stage of selftest */
+#define TGEN_FLAGS_TST2 0x00000002  /* set during second stage of selftest */
 
 #define TGEN_STATE_STOPPED 0
 #define TGEN_STATE_RUNNING 1
 
 struct tgen_s {
+  uint32_t flags;
+  void *user_data;
   int variables[26];
   int pc;
   int state;  /* TGEN_STATE_... */
@@ -65,14 +73,13 @@ struct tgen_s {
 typedef struct tgen_s tgen_t;
 
 
-tgen_t *tgen_create(int max_steps);
+tgen_t *tgen_create(int max_steps, uint32_t flags, void *user_data);
 void tgen_delete(tgen_t *tgen);
 void tgen_add_step(tgen_t *tgen, char *iline);
 void tgen_add_multi_steps(tgen_t *tgen, char *iline);
 void tgen_run(tgen_t *tgen);
 void tgen_run1(tgen_t *tgen, tgen_step_t *step);
-void my_sendt(int len, int rate, int duration_usec);
-void my_sendc(int len, int rate, int msg_count);
+void my_send(void *user_data);
 
 #if defined(__cplusplus)
 }
