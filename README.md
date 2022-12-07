@@ -22,7 +22,7 @@ But not this time. :-)
 
 ## Repository
 
-See https://github.com/UltraMessaging/tgen for code and documentation.
+See https://github.com/fordsfords/tgen for code and documentation.
 
 # License
 
