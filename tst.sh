@@ -136,7 +136,8 @@ echo passed
 
 echo test7
 rm -f time.out
-command time -p -o time.out ./tgen_test -f 2 -m 99 -s "sendt 700 bytes 100 persec 1 sec" >tgen_test.out 2>&1
+# The set of variable 'z' is for the test assertion inside "my_send()".
+command time -p -o time.out ./tgen_test -f 2 -m 99 -s "set z 271828; sendt 700 bytes 100 persec 1 sec" >tgen_test.out 2>&1
 STATUS=$?
 
 # Success status is expected
@@ -149,7 +150,8 @@ echo passed
 
 echo test8
 rm -f time.out
-command time -p -o time.out ./tgen_test -f 2 -m 99 -s "sendc 700 bytes 100 persec 101 msgs" >tgen_test.out 2>&1
+# The set of variable 'z' is for the test assertion inside "my_send()".
+command time -p -o time.out ./tgen_test -m 99 -s "set z 271828; sendc 700 bytes 100 persec 101 msgs" >tgen_test.out 2>&1
 STATUS=$?
 
 # Success status is expected

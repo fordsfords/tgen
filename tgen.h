@@ -57,7 +57,6 @@ struct tgen_script_s {
 
 typedef struct tgen_script_s tgen_script_t;
 #define TGEN_FLAGS_TST1 0x00000001  /* set during first stage of selftest */
-#define TGEN_FLAGS_TST2 0x00000002  /* set during second stage of selftest */
 
 #define TGEN_STATE_STOPPED 0
 #define TGEN_STATE_RUNNING 1
@@ -75,11 +74,14 @@ typedef struct tgen_s tgen_t;
 
 tgen_t *tgen_create(int max_steps, uint32_t flags, void *user_data);
 void tgen_delete(tgen_t *tgen);
+void *tgen_user_data_get(tgen_t *tgen);
+int tgen_variable_get(tgen_t *tgen, char var_id);
+void tgen_variable_set(tgen_t *tgen, char var_id, int value);
 void tgen_add_step(tgen_t *tgen, char *iline);
 void tgen_add_multi_steps(tgen_t *tgen, char *iline);
 void tgen_run(tgen_t *tgen);
 void tgen_run1(tgen_t *tgen, tgen_step_t *step);
-void my_send(void *user_data);
+void my_send(int len, tgen_t *tgen);
 
 #if defined(__cplusplus)
 }

@@ -24,6 +24,15 @@ But not this time. :-)
 
 See https://github.com/fordsfords/tgen for code and documentation.
 
+# Usage
+
+The tgen module is not a traffic generator.
+It is an API to make it easier to write a flexiable,
+easy-to-use traffic generator.
+In particular, the tgen module does not know what
+you are sending or how to send it.
+It just orchestrates.
+
 # License
 
 I want there to be NO barriers to using this code, so I am releasing it to the public domain.  But "public domain" does not have an internationally agreed upon definition, so I use CC0:

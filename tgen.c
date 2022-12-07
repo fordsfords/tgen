@@ -314,16 +314,15 @@ int tgen_parse_step(tgen_t *tgen, char *iline, tgen_step_t *step)
 
 void tgen_run_sendt(tgen_t *tgen, tgen_step_t *step)
 {
-  struct timespec cur_ts;
-  struct timespec start_ts;
-  uint64_t num_sent;
-  int len = step->len;
   int rate = step->rate;
   uint64_t duration_ns = 1000 * step->duration_usec;
   uint64_t ns_so_far;
+  struct timespec cur_ts;
+  struct timespec start_ts;
+  uint64_t num_sent;
 
   if (tgen->flags & TGEN_FLAGS_TST1) {
-    fprintf(stderr, "sendt, %d %d %d\n", len, rate, step->duration_usec);
+    fprintf(stderr, "sendt, %d %d %d\n", step->len, rate, step->duration_usec);
     return;
   }
 
@@ -339,13 +338,7 @@ void tgen_run_sendt(tgen_t *tgen, tgen_step_t *step)
 
     /* If we are behind where we should be, get caught up. */
     while (num_sent < should_have_sent) {
-      if (tgen->flags & TGEN_FLAGS_TST2) {
-        int i; for (i=0; i<300; i++){}
-        fprintf(stderr, "send message\n");
-      }
-      else {
-int i; for (i=0; i<300; i++){} /*???*/
-      }
+      my_send(step->len, tgen);
 
       num_sent++;
     }  /* while num_sent < should_have_sent */
@@ -359,13 +352,12 @@ void tgen_run_sendc(tgen_t *tgen, tgen_step_t *step)
   struct timespec cur_ts;
   struct timespec start_ts;
   uint64_t num_sent;
-  int len = step->len;
   int rate = step->rate;
   int num_msgs = step->num_msgs;
   uint64_t ns_so_far;
 
   if (tgen->flags & TGEN_FLAGS_TST1) {
-    fprintf(stderr, "sendc, %d %d %d\n", len, rate, num_msgs);
+    fprintf(stderr, "sendc, %d %d %d\n", step->len, rate, num_msgs);
     return;
   }
 
@@ -384,13 +376,7 @@ void tgen_run_sendc(tgen_t *tgen, tgen_step_t *step)
 
     /* If we are behind where we should be, get caught up. */
     while (num_sent < should_have_sent) {
-      if (tgen->flags & TGEN_FLAGS_TST2) {
-        int i; for (i=0; i<300; i++){}
-        fprintf(stderr, "send message\n");
-      }
-      else {
-int i; for (i=0; i<300; i++){} /*???*/
-      }
+      my_send(step->len, tgen);
 
       num_sent++;
     }  /* while num_sent < should_have_sent */
@@ -529,6 +515,26 @@ void tgen_delete(tgen_t *tgen)
   free(tgen->script);
   free(tgen);
 }  /* tgen_delete */
+
+
+void *tgen_user_data_get(tgen_t *tgen)
+{
+  return tgen->user_data;
+}  /* tgen_user_data_get */
+
+
+int tgen_variable_get(tgen_t *tgen, char var_id)
+{
+  CPRT_ASSERT(var_id >= 'a' && var_id <= 'z');
+  return tgen->variables[var_id - 'a'];
+}  /* tgen_variable_get */
+
+
+void tgen_variable_set(tgen_t *tgen, char var_id, int value)
+{
+  CPRT_ASSERT(var_id >= 'a' && var_id <= 'z');
+  tgen->variables[var_id - 'a'] = value;
+}  /* tgen_variable_set */
 
 
 void tgen_add_step(tgen_t *tgen, char *iline)
