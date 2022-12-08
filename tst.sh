@@ -89,7 +89,7 @@ if egrep "sendc, 700000000 100000000 3000000" tgen_test.out >/dev/null; then :; 
 echo passed
 
 echo test5
-./tgen_test -t 2 -f 1 -s "set i 10;label l;sendt 700 bytes 100 persec 1 sec;stop;sendt 700 bytes 100 persec 9 sec" >tgen_test.out 2>&1
+./tgen_test -t 2 -f 1 -s "set i 10;label l;sendt 700 bytes 100 persec 1 sec" >tgen_test.out 2>&1
 STATUS=$?
 
 # Success status is expected

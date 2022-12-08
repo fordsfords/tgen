@@ -28,11 +28,10 @@ extern "C" {
 /* Valid opcodes for steps. */
 #define TGEN_OPCODE_SENDT 1
 #define TGEN_OPCODE_SENDC 2
-#define TGEN_OPCODE_STOP 3
-#define TGEN_OPCODE_SET 4
-#define TGEN_OPCODE_LOOP 5
-#define TGEN_OPCODE_DELAY 6
-#define TGEN_OPCODE_REPL 7
+#define TGEN_OPCODE_SET 3
+#define TGEN_OPCODE_LOOP 4
+#define TGEN_OPCODE_DELAY 5
+#define TGEN_OPCODE_REPL 6
 
 struct tgen_step_s {
   int index;

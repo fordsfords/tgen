@@ -160,23 +160,6 @@ int tgen_parse_sendc(char *iline, tgen_step_t *step)
 }  /* tgen_parse_sendc */
 
 
-int tgen_parse_stop(char *iline, tgen_step_t *step)
-{
-  int null_ofs = 0;
-
-  (void)sscanf(iline, " stop"
-      " %n",
-      &null_ofs);
-  if (iline[null_ofs] != '\0' && iline[null_ofs] != '#') {
-    return -1;
-  }
-
-  step->opcode = TGEN_OPCODE_STOP;
-
-  return 1;
-}  /* tgen_parse_stop */
-
-
 int tgen_parse_set(char *iline, tgen_step_t *step)
 {
   char variable_name[TGEN_MAX_KEYWORD+1];
@@ -295,7 +278,6 @@ int tgen_parse_step(tgen_t *tgen, char *iline, tgen_step_t *step)
   if ((stat = tgen_parse_comment(iline, step)) >= 0) return stat;
   if ((stat = tgen_parse_sendt(iline, step)) >= 0) return stat;
   if ((stat = tgen_parse_sendc(iline, step)) >= 0) return stat;
-  if ((stat = tgen_parse_stop(iline, step)) >= 0) return stat;
   if ((stat = tgen_parse_set(iline, step)) >= 0) return stat;
   if ((stat = tgen_parse_label(tgen, iline, step)) >= 0) return stat;
   if ((stat = tgen_parse_loop(iline, step)) >= 0) return stat;
@@ -382,12 +364,7 @@ void tgen_run_sendc(tgen_t *tgen, tgen_step_t *step)
     }  /* while num_sent < should_have_sent */
     CPRT_GETTIME(&cur_ts);
   } while (num_sent < num_msgs);
-}  /* tgen_run_stop */
-
-void tgen_run_stop(tgen_t *tgen, tgen_step_t *step)
-{
-  tgen->state = TGEN_STATE_STOPPED;
-}  /* tgen_run_stop */
+}  /* tgen_run_sendc */
 
 
 void tgen_run_set(tgen_t *tgen, tgen_step_t *step)
@@ -441,7 +418,6 @@ void tgen_run1(tgen_t *tgen, tgen_step_t *step)
   switch (step->opcode) {
   case TGEN_OPCODE_SENDT: tgen_run_sendt(tgen, step); break;
   case TGEN_OPCODE_SENDC: tgen_run_sendc(tgen, step); break;
-  case TGEN_OPCODE_STOP: tgen_run_stop(tgen, step); break;
   case TGEN_OPCODE_SET: tgen_run_set(tgen, step); break;
   case TGEN_OPCODE_LOOP: tgen_run_loop(tgen, step); break;
   case TGEN_OPCODE_DELAY: tgen_run_delay(tgen, step); break;
@@ -458,6 +434,7 @@ void tgen_run(tgen_t *tgen)
   tgen->state = TGEN_STATE_RUNNING;
   while (tgen->state == TGEN_STATE_RUNNING) {
     if (tgen->pc >= tgen->script->num_steps) {
+      /* No more steps, exit. */
       tgen->state = TGEN_STATE_STOPPED;
     }
     else {
