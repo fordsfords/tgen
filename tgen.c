@@ -338,7 +338,7 @@ void tgen_run_sendt(tgen_t *tgen, tgen_step_t *step)
 
     /* If we are behind where we should be, get caught up. */
     while (num_sent < should_have_sent) {
-      my_send(step->len, tgen);
+      my_send(tgen, step->len);
 
       num_sent++;
     }  /* while num_sent < should_have_sent */
@@ -376,7 +376,7 @@ void tgen_run_sendc(tgen_t *tgen, tgen_step_t *step)
 
     /* If we are behind where we should be, get caught up. */
     while (num_sent < should_have_sent) {
-      my_send(step->len, tgen);
+      my_send(tgen, step->len);
 
       num_sent++;
     }  /* while num_sent < should_have_sent */
@@ -393,6 +393,7 @@ void tgen_run_stop(tgen_t *tgen, tgen_step_t *step)
 void tgen_run_set(tgen_t *tgen, tgen_step_t *step)
 {
   tgen->variables[step->variable_index] = step->value;
+  my_variable_change(tgen, step->variable_index + 'a', step->value);
 }  /* tgen_run_set */
 
 
@@ -405,6 +406,7 @@ void tgen_run_loop(tgen_t *tgen, tgen_step_t *step)
   int variable_index = step->variable_index;
   if (tgen->variables[variable_index] > 0) {
     tgen->variables[variable_index] --;
+    my_variable_change(tgen, variable_index + 'a', tgen->variables[variable_index]);
   }
 
   if (tgen->variables[variable_index] > 0) {
@@ -536,6 +538,7 @@ void tgen_variable_set(tgen_t *tgen, char var_id, int value)
 {
   CPRT_ASSERT(var_id >= 'a' && var_id <= 'z');
   tgen->variables[var_id - 'a'] = value;
+  my_variable_change(tgen, var_id, value);
 }  /* tgen_variable_set */
 
 

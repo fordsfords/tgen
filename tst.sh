@@ -94,8 +94,9 @@ STATUS=$?
 
 # Success status is expected
 if [ "$STATUS" -ne 0 ]; then echo failed 1; exit 1; fi
-if [ "`wc -l <tgen_test.out`" -ne 1 ]; then echo failed 2; exit 1; fi
+if [ "`wc -l <tgen_test.out`" -ne 2 ]; then echo failed 2; exit 1; fi
 if egrep "sendt, 700 100 1000000" tgen_test.out >/dev/null; then :; else echo failed 3; exit 1; fi
+if egrep "Variable i = 10" tgen_test.out >/dev/null; then :; else echo failed 4; exit 1; fi
 echo passed
 
 echo test6
@@ -118,12 +119,13 @@ STATUS=$?
 
 # Success status is expected
 if [ "$STATUS" -ne 0 ]; then echo failed 1; exit 1; fi
-if [ "`wc -l <tgen_test.out`" -ne 11 ]; then echo failed 2; exit 1; fi
+if [ "`wc -l <tgen_test.out`" -ne 24 ]; then echo failed 2; exit 1; fi
 if egrep "sendt, 700 100 4000000" tgen_test.out >/dev/null; then :; else echo failed 3; exit 1; fi
+if egrep "Variable i = 3" tgen_test.out >/dev/null; then :; else echo failed 4; exit 1; fi
 # Nine sleeps of 200 ms each = 1.80 seconds. Get the "real" time and
 # remove the decimal to get 180 (nominally).
 T=`sed -n 's/real \([0-9]*\)\.\([0-9]*\)$/\1\2/p' <time.out`
-if [ "$T" -lt 170 -o "$T" -gt 195 ]; then echo failed 4; exit 1; fi
+if [ "$T" -lt 170 -o "$T" -gt 195 ]; then echo failed 5; exit 1; fi
 echo passed
 
 echo test7

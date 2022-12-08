@@ -56,13 +56,20 @@ void get_my_options(int argc, char **argv)
 }  /* get_my_options */
 
 
-void my_send(int len, tgen_t *tgen)
+void my_send(tgen_t *tgen, int len)
 {
   my_data_t *my_data = (my_data_t *)tgen_user_data_get(tgen);
   CPRT_ASSERT(my_data->test_int == 314159);
   CPRT_ASSERT(tgen_variable_get(tgen, 'z') == 271828);
   fprintf(stderr, "send message %d\n", len);
 }  /* my_send */
+
+
+void my_variable_change(tgen_t *tgen, char var_id, int value)
+{
+  CPRT_ASSERT(value == tgen_variable_get(tgen, var_id));
+  fprintf(stderr, "Variable %c = %d\n", var_id, value);
+}  /* my_variable_change */
 
 
 void test1()

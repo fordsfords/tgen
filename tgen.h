@@ -81,7 +81,10 @@ void tgen_add_step(tgen_t *tgen, char *iline);
 void tgen_add_multi_steps(tgen_t *tgen, char *iline);
 void tgen_run(tgen_t *tgen);
 void tgen_run1(tgen_t *tgen, tgen_step_t *step);
-void my_send(int len, tgen_t *tgen);
+
+/* Functions the application must provide. */
+void my_send(tgen_t *tgen, int len);
+void my_variable_change(tgen_t *tgen, char var_id, int value);
 
 #if defined(__cplusplus)
 }
