@@ -394,7 +394,17 @@ void tgen_run_loop(tgen_t *tgen, tgen_step_t *step)
 
 void tgen_run_delay(tgen_t *tgen, tgen_step_t *step)
 {
-  usleep(step->duration_usec);
+  uint64_t duration_ns = 1000 * step->duration_usec;
+  uint64_t ns_so_far;
+  struct timespec cur_ts;
+  struct timespec start_ts;
+
+  CPRT_GETTIME(&start_ts);
+  cur_ts = start_ts;
+  do {  /* while */
+    CPRT_DIFF_TS(ns_so_far, cur_ts, start_ts);
+    CPRT_GETTIME(&cur_ts);
+  } while (ns_so_far < duration_ns);
 }  /* tgen_run_set */
 
 
