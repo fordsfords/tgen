@@ -2,36 +2,28 @@
 
 Utility functions to assist in the creation of a traffic generator.
 
-# Table of contents
-
-<sup>(table of contents from https://luciopaiva.com/markdown-toc/)</sup>
-
 # Introduction
 
 This is a "little language" processor to assist in the construction of a network traffic generator.
 
-## Little Langues Considered Harmful?
+The tgen module is not actually a traffic generator.
+It is an API to make it easier to write a flexiable,
+easy-to-use traffic generator.
+It is an "orchestrator".
 
-Little languages have been [promoted](http://staff.um.edu.mt/afra1/seminar/little-languages.pdf) and
-[criticized](https://3e8.org/pub/scheme/doc/Universal%20Scripting%20Framework%20(Lambda%20as%20little%20language).pdf).
+An real traffic generator based on tgen is at:
+https://github.com/UltraMessaging/um_tgen
 
-I'm generally skeptical of them (do we really need yet another language?),
-and I've talked myself out of writing them on several occasions.
-
-But not this time. :-)
+To document tgen would involve duplicating most of the documentation in um_tgen.
+Since I don't expect this module to become wildly popular -
+um_tgen will likely be the only tool to use tgen -
+I won't bother documenting tgen here.
+See https://github.com/UltraMessaging/um_tgen for
+documentation.
 
 ## Repository
 
 See https://github.com/fordsfords/tgen for code and documentation.
-
-# Usage
-
-The tgen module is not a traffic generator.
-It is an API to make it easier to write a flexiable,
-easy-to-use traffic generator.
-In particular, the tgen module does not know what
-you are sending or how to send it.
-It just orchestrates.
 
 # License
 
