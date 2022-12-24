@@ -55,7 +55,8 @@ struct tgen_script_s {
 
 
 typedef struct tgen_script_s tgen_script_t;
-#define TGEN_FLAGS_TST1 0x00000001  /* set during first stage of selftest */
+#define TGEN_FLAGS_TST1 0x00000001  /* Set during first stage of selftest. */
+#define TGEN_FLAGS_PRINT_RATE 0x00000002  /* Print the actual achieved send rate. */
 
 #define TGEN_STATE_STOPPED 0
 #define TGEN_STATE_RUNNING 1

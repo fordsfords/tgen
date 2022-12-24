@@ -297,7 +297,7 @@ int tgen_parse_step(tgen_t *tgen, char *iline, tgen_step_t *step)
 void tgen_run_sendt(tgen_t *tgen, tgen_step_t *step)
 {
   int rate = step->rate;
-  uint64_t duration_ns = 1000 * step->duration_usec;
+  uint64_t duration_ns = 1000 * (uint64_t)step->duration_usec;
   uint64_t ns_so_far;
   struct timespec cur_ts;
   struct timespec start_ts;
@@ -312,20 +312,31 @@ void tgen_run_sendt(tgen_t *tgen, tgen_step_t *step)
    * http://www.geeky-boy.com/catchup/html/ */
   CPRT_GETTIME(&start_ts);
   cur_ts = start_ts;
+  ns_so_far = 0;
   num_sent = 0;
   do {  /* while */
-    CPRT_DIFF_TS(ns_so_far, cur_ts, start_ts);
     /* The +1 is because we want to send, then pause. */
     uint64_t should_have_sent = (ns_so_far * rate)/1000000000 + 1;
 
-    /* If we are behind where we should be, get caught up. */
+    /* If we are behind where we should be, tight loop to get caught up. */
+    if (should_have_sent > num_sent + 20) {
+      should_have_sent = num_sent + 20;  /* Limit tight loops to 20. */
+    }
     while (num_sent < should_have_sent) {
       my_send(tgen, step->len);
 
       num_sent++;
     }  /* while num_sent < should_have_sent */
     CPRT_GETTIME(&cur_ts);
+    CPRT_DIFF_TS(ns_so_far, cur_ts, start_ts);
   } while (ns_so_far < duration_ns);
+
+  if (tgen->flags & TGEN_FLAGS_PRINT_RATE) {
+    printf("sendt len=%d rate=%d duration_usec=%d, actual rate=%ld, actual msgs=%ld\n",
+        step->len, step->rate, step->duration_usec,
+        (long)((num_sent * 1000000) / (ns_so_far / 1000)),
+        (long)num_sent);
+  }
 }  /* tgen_run_sendt */
 
 
@@ -347,23 +358,33 @@ void tgen_run_sendc(tgen_t *tgen, tgen_step_t *step)
    * http://www.geeky-boy.com/catchup/html/ */
   CPRT_GETTIME(&start_ts);
   cur_ts = start_ts;
+  ns_so_far = 0;
   num_sent = 0;
   do {  /* while num_sent < num_msgs */
-    CPRT_DIFF_TS(ns_so_far, cur_ts, start_ts);
     /* The +1 is because we want to send, then pause. */
     uint64_t should_have_sent = (ns_so_far * rate)/1000000000 + 1;
     if (should_have_sent > num_msgs) {
       should_have_sent = num_msgs;
     }
 
-    /* If we are behind where we should be, get caught up. */
+    /* If we are behind where we should be, tight loop to get caught up. */
+    if (should_have_sent > num_sent + 20) {
+      should_have_sent = num_sent + 20;  /* Limit tight loops to 20. */
+    }
     while (num_sent < should_have_sent) {
       my_send(tgen, step->len);
 
       num_sent++;
     }  /* while num_sent < should_have_sent */
     CPRT_GETTIME(&cur_ts);
+    CPRT_DIFF_TS(ns_so_far, cur_ts, start_ts);
   } while (num_sent < num_msgs);
+
+  if (tgen->flags & TGEN_FLAGS_PRINT_RATE) {
+    printf("sendc len=%d rate=%d num_msgs=%d, actual rate=%ld\n",
+        step->len, step->rate, step->num_msgs,
+        (long)((num_sent * 1000000) / (ns_so_far / 1000)));
+  }
 }  /* tgen_run_sendc */
 
 
@@ -394,7 +415,7 @@ void tgen_run_loop(tgen_t *tgen, tgen_step_t *step)
 
 void tgen_run_delay(tgen_t *tgen, tgen_step_t *step)
 {
-  uint64_t duration_ns = 1000 * step->duration_usec;
+  uint64_t duration_ns = 1000 * (uint64_t)step->duration_usec;
   uint64_t ns_so_far;
   struct timespec cur_ts;
   struct timespec start_ts;
