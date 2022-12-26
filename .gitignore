@@ -5,6 +5,7 @@ x.*
 *.tmp
 tmp.*
 *.tmp[0-9]
+tgen_test.[0-9]
 ~*
 .DS_Store
 lbm.sh

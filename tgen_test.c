@@ -27,7 +27,7 @@ typedef struct my_data_s my_data_t;
 /* Options */
 int o_flags = 0;
 char *o_script_str = NULL;
-int o_test_num;
+int o_test_num = -1;
 
 void usage(int exit_status)
 {
@@ -49,8 +49,13 @@ void get_my_options(int argc, char **argv)
     }  /* switch */
   }  /* while */
 
-  if (o_test_num == 2 && o_script_str == NULL) {
-    fprintf(stderr, "test2 requires script\n");
+  if (o_test_num == -1) {
+    fprintf(stderr, "Test number ('-t test_num') is required.\n");
+    usage(1);
+  }
+
+  if (o_test_num != 1 && o_script_str == NULL) {
+    fprintf(stderr, "test %d requires script\n", o_test_num);
     usage(1);
   }
 }  /* get_my_options */
@@ -59,8 +64,10 @@ void get_my_options(int argc, char **argv)
 void my_send(tgen_t *tgen, int len)
 {
   my_data_t *my_data = (my_data_t *)tgen_user_data_get(tgen);
-  CPRT_ASSERT(my_data->test_int == 314159);
-  CPRT_ASSERT(tgen_variable_get(tgen, 'z') == 271828);
+  if (o_test_num > 0) {
+    CPRT_ASSERT(my_data->test_int == 314159);
+    CPRT_ASSERT(tgen_variable_get(tgen, 'z') == 271828);
+  }
   fprintf(stderr, "send message %d\n", len);
 }  /* my_send */
 
@@ -70,6 +77,23 @@ void my_variable_change(tgen_t *tgen, char var_id, int value)
   CPRT_ASSERT(value == tgen_variable_get(tgen, var_id));
   fprintf(stderr, "Variable %c = %d\n", var_id, value);
 }  /* my_variable_change */
+
+
+void test0()
+{
+  my_data_t my_data;
+  tgen_t *tgen;
+
+  my_data.test_int = 314159;
+
+  tgen = tgen_create(o_flags, &my_data);
+
+  tgen_add_multi_steps(tgen, o_script_str);
+
+  tgen_run(tgen);
+
+  tgen_delete(tgen);
+}  /* test0 */
 
 
 void test1()
@@ -114,6 +138,7 @@ int main(int argc, char **argv)
   get_my_options(argc, argv);
 
   switch (o_test_num) {
+    case 0: test0(); break;
     case 1: test1(); break;
     case 2: test2(); break;
 
