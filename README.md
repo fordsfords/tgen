@@ -56,7 +56,7 @@ Indention is allowed.
 
 Here's an example usage:
 ````
-./tgen_test -t 2 -s "
+./tgen_test -t 0 -s "
   delay 200 msec # let topic resolution happen.
   sendc 700 bytes 2 persec 10 msgs
   delay 2 sec   # linger to allow NAK/retransmits to complete."
@@ -64,7 +64,7 @@ Here's an example usage:
 Note that the "-s" option (script) has a multi-line value.
 This same script could be written without comments and with semi-colons instead of newlines:
 ````
-./tgen_test -t 2 -s "delay 200 msec; sendc 700 bytes 2 persec 10 msgs; delay 2 sec"
+./tgen_test -t 0 -s "delay 200 msec; sendc 700 bytes 2 persec 10 msgs; delay 2 sec"
 ````
 
 Each instruction consists of a keyword,
@@ -115,7 +115,7 @@ or to communicate with the application as "special variables" (see below).
 
 Here's an example of a loop instruction:
 ````
-./tgen_test -t 2 -s "
+./tgen_test -t 0 -s "
   delay 200 msec # let topic resolution happen.
   set i 10
   label a
@@ -139,7 +139,7 @@ allowing the user to interactively enter commands.
 Here's an example of using the 'repl' instruction:
 
 ````
-./tgen_test -t 2 -s "repl"
+./tgen_test -t 0 -s "repl"
 repl?
 ````
 The "tgen_test" command has created the tgen instance
