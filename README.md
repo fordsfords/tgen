@@ -41,6 +41,7 @@ It will return when the script completes.
 
 An real traffic generator based on tgen is at:
 https://github.com/UltraMessaging/um_tgen
+Use that as a guide for your own.
 
 # Scripting Language
 
@@ -55,7 +56,7 @@ Indention is allowed.
 
 Here's an example usage:
 ````
-./um_tgen -a 2 -g -x um.xml -t topic1 -s "
+./tgen_test -t 2 -s "
   delay 200 msec # let topic resolution happen.
   sendc 700 bytes 2 persec 10 msgs
   delay 2 sec   # linger to allow NAK/retransmits to complete."
@@ -63,7 +64,7 @@ Here's an example usage:
 Note that the "-s" option (script) has a multi-line value.
 This same script could be written without comments and with semi-colons instead of newlines:
 ````
-./um_tgen -a 2 -g -x um.xml -t topic1 -s "delay 200 msec; sendc 700 bytes 2 persec 10 msgs; delay 2 sec"
+./tgen_test -t 2 -s "delay 200 msec; sendc 700 bytes 2 persec 10 msgs; delay 2 sec"
 ````
 
 Each instruction consists of a keyword,
@@ -86,7 +87,7 @@ with "0x".
 # Sending Messages
 
 Sending messages is the basic function of a traffic generator.
-The um_tgen tool has two instructions:
+The tgen module has two instructions:
 * sendt - send messages for a specified period of time.
 * sendc - send a specific number of messages.
 
@@ -106,20 +107,6 @@ Note that the tool does not initialize the
 message contents.
 It's just whatever malloc returned.
 
-# Smart Sources
-
-Starting with UM version 6.10,
-a fast, low-jitter form of UM source was introduced,
-called [Smart Source](https://ultramessaging.github.io/currdoc/doc/Design/advancedoptimizations.html#smartsources).
-Since we want the traffic generator to have the highest possible rate,
-um_tgen uses smart sources by default.
-You can override and force um_tgen to use generic sources with the "-g" command-line
-option.
-
-To build this tool with a version of UM prior to 6.10,
-omit the "-DUM_SSRC" from the build command in "tst.sh".
-This omits the code for Smart Sources.
-
 # Variables, Labels, and Looping
 
 The tgen package supports 26 general-purpose integer variables ('a' - 'z').
@@ -128,7 +115,7 @@ or to communicate with the application as "special variables" (see below).
 
 Here's an example of a loop instruction:
 ````
-./um_tgen -a 2 -g -x um.xml -t topic1 -s "
+./tgen_test -t 2 -s "
   delay 200 msec # let topic resolution happen.
   set i 10
   label a
@@ -143,25 +130,6 @@ This is repeated 10 times.
 Note that the label ('a' - 'z') are a separate name space from variable ('a' - 'z').
 I.e. you can have a label 'a' and an unrelated variable 'a'.
 
-## Special Variable for Loss
-
-Although the tgen package does not assign any special meaning to any variable,
-the application using tgen can assign meaning according to its needs.
-
-The um_tgen application assigns special meaning to the following variables:
-* **'l'** - Loss percentage for LBT-RM. Valid from 0 to 100.
-
-Here's an example of using the 'l' special variable:
-````
-./um_tgen -a 2 -g -x um.xml -t topic1 -s "
-  delay 200 msec # let topic resolution happen.
-  sendc 700 bytes 1 persec 1 msgs  # Send one message.
-  set l 100  # Set 100% loss.
-  sendc 700 bytes 1 persec 1 msgs  # This message is lost.
-  set l 0  # Set 0% loss.
-  delay 1 sec  # Let next session message trigger repair."
-````
-
 # REPL
 
 A [REPL](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop)
@@ -171,10 +139,10 @@ allowing the user to interactively enter commands.
 Here's an example of using the 'repl' instruction:
 
 ````
-./um_tgen -a 2 -g -x um.xml -t topic1 -s "repl"
+./tgen_test -t 2 -s "repl"
 repl?
 ````
-The "um_tgen" command has created the context and the source,
+The "tgen_test" command has created the tgen instance
 and is now waiting for you to enter a command.
 For example, type a "sendc" command to send a message:
 ````
