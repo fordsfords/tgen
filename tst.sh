@@ -99,9 +99,10 @@ if egrep "sendt, 700 100 1000000" tgen_test.2 >/dev/null; then :; else echo fail
 if egrep "Variable i = 10" tgen_test.2 >/dev/null; then :; else echo failed 4; exit 1; fi
 echo passed
 
+# This is the same as test3() in "tgen_test.c".
 echo test6
 rm -f time.out
-command time -p -o time.out ./tgen_test -t 2 -f 3 -s "
+command time -p -o time.out ./tgen_test -t 0 -f 3 -s "
 sendt 700 bytes 100 persec 1 sec
 set i 3
 label l
@@ -119,19 +120,34 @@ STATUS=$?
 
 # Success status is expected
 if [ "$STATUS" -ne 0 ]; then echo failed 1; exit 1; fi
-if [ "`wc -l <tgen_test.2`" -ne 24 ]; then echo failed 2; exit 1; fi
+if [ "`wc -l <tgen_test.2`" -ne 11 ]; then echo failed 2; exit 1; fi
 if egrep "sendt, 700 100 4000000" tgen_test.2 >/dev/null; then :; else echo failed 3; exit 1; fi
-if egrep "Variable i = 3" tgen_test.2 >/dev/null; then :; else echo failed 4; exit 1; fi
 # Nine sleeps of 200 ms each = 1.80 seconds. Get the "real" time and
 # remove the decimal to get 180 (nominally).
 T=`sed -n 's/real \([0-9]*\)\.\([0-9]*\)$/\1\2/p' <time.out`
-if [ "$T" -lt 170 -o "$T" -gt 195 ]; then echo failed 5; exit 1; fi
+if [ "$T" -lt 170 -o "$T" -gt 195 ]; then echo failed 4; exit 1; fi
 echo passed
 
+# Test3() in "tgen_test.c".
 echo test7
 rm -f time.out
+command time -p -o time.out ./tgen_test -t 3 -f 3 2>tgen_test.2
+STATUS=$?
+
+# Success status is expected
+if [ "$STATUS" -ne 0 ]; then echo failed 1; exit 1; fi
+if [ "`wc -l <tgen_test.2`" -ne 11 ]; then echo failed 2; exit 1; fi
+if egrep "sendt, 700 100 4000000" tgen_test.2 >/dev/null; then :; else echo failed 3; exit 1; fi
+# Nine sleeps of 200 ms each = 1.80 seconds. Get the "real" time and
+# remove the decimal to get 180 (nominally).
+T=`sed -n 's/real \([0-9]*\)\.\([0-9]*\)$/\1\2/p' <time.out`
+if [ "$T" -lt 170 -o "$T" -gt 195 ]; then echo failed 4; exit 1; fi
+echo passed
+
+echo test8
+rm -f time.out
 # The set of variable 'z' is for the test assertion inside "my_send()".
-command time -p -o time.out ./tgen_test -f 2 -t 2 -s "set z 271828; sendt 700 bytes 100 persec 1 sec" 2>tgen_test.2
+command time -p -o time.out ./tgen_test -f 2 -t 2 -s "set z 271828; sendt 700 bytes 100 persec 1 sec" >tgen_test.1 2>tgen_test.2
 STATUS=$?
 
 # Success status is expected
@@ -140,12 +156,13 @@ SEND_CNT="`egrep "send message" <tgen_test.2 | wc -l`"
 if [ $SEND_CNT -lt 99 -o $SEND_CNT -gt 103 ]; then echo failed 2; exit 1; fi
 T=`sed -n 's/real \([0-9]*\)\.\([0-9]*\)$/\1\2/p' <time.out`
 if [ "$T" -lt 98 -o "$T" -gt 102 ]; then echo failed 3; exit 1; fi
+if egrep "sendt len=700 rate=100 duration_usec=1000000, actual rate=100, actual msgs=100" tgen_test.1 >/dev/null; then :; else echo failed 4; exit 1; fi
 echo passed
 
-echo test8
+echo test9
 rm -f time.out
 # The set of variable 'z' is for the test assertion inside "my_send()".
-command time -p -o time.out ./tgen_test -f 2 -t 2 -s "set z 271828; sendc 700 bytes 100 persec 101 msgs" 2>tgen_test.2
+command time -p -o time.out ./tgen_test -f 2 -t 2 -s "set z 271828; sendc 700 bytes 100 persec 101 msgs" >tgen_test.1 2>tgen_test.2
 STATUS=$?
 
 # Success status is expected
@@ -154,4 +171,5 @@ SEND_CNT="`egrep "send message" <tgen_test.2 | wc -l`"
 if [ $SEND_CNT -ne 101 ]; then echo failed 2; exit 1; fi
 T=`sed -n 's/real \([0-9]*\)\.\([0-9]*\)$/\1\2/p' <time.out`
 if [ "$T" -lt 98 -o "$T" -gt 102 ]; then echo failed 3; exit 1; fi
+if egrep "sendc len=700 rate=100 num_msgs=101, actual rate=100" tgen_test.1 >/dev/null; then :; else echo failed 4; exit 1; fi
 echo passed

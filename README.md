@@ -2,6 +2,31 @@
 
 Utility functions to assist in the creation of a traffic generator.
 
+# Table of contents
+
+- [tgen - Traffic generator](#tgen---traffic-generator)
+- [Introduction](#introduction)
+  - [Repository](#repository)
+- [Quick Start](#quick-start)
+- [Scripting Language](#scripting-language)
+- [Embedded API](#embedded-api)
+- [Sending Messages](#sending-messages)
+- [Variables, Labels, and Looping](#variables-labels-and-looping)
+  - [Special Variables](#special-variables)
+- [REPL](#repl)
+- [Instruction Set](#instruction-set)
+  - [Comment](#comment)
+  - [Sendt](#sendt)
+  - [Sendc](#sendc)
+  - [Set](#set)
+  - [Label](#label)
+  - [Loop](#loop)
+  - [Delay](#delay)
+  - [Repl](#repl)
+- [TODO](#todo)
+- [License](#license)
+<sup>(table of contents from https://luciopaiva.com/markdown-toc/)</sup>
+
 # Introduction
 
 This is a "little language" processing module and API designed to assist
@@ -39,7 +64,7 @@ Your main program calls:
 It will return when the script completes.
 * tgen_delete() - graceful shutdown and cleanup of tgen instance.
 
-An real traffic generator based on tgen is at:
+A real traffic generator based on tgen is at:
 https://github.com/UltraMessaging/um_tgen
 Use that as a guide for your own.
 
@@ -84,6 +109,66 @@ SendT 700 Bytes 50 KPerSec 3 Sec  # Upper-case not allowed.
 Numeric fields may be specified in hexidecimal by prefixing
 with "0x".
 
+# Embedded API
+
+Little languages are usually ... little.
+They usually lack the rich expressiveness of a regular language.
+For example, the tgen scripting language doesn't have support for subroutines.
+
+Rather than adding more and more language features,
+tgen offers its basic functional operations as an API,
+allowing you to write your "script" in C/C++.
+This would be compiled directly into your traffic generator tool,
+"embedding the script".
+
+For example, the script:
+````
+sendt 700 bytes 100 persec 1 sec
+set i 3
+label l
+  set j 2
+  label m
+    sendt 700 bytes 100 persec 2 sec
+    delay 200 msec
+  loop m j
+  sendt 700 bytes 100 persec 3 sec
+  delay 200 msec
+loop l i
+sendt 700 bytes 100 persec 4 sec
+````
+could be written in C as:
+````
+  my_data_t my_data;
+  tgen_t *tgen;
+  int i, j;
+
+  my_data.test_int = 314159;
+
+  tgen = tgen_create(o_flags, &my_data);
+
+  tgen_run_sendt(tgen, 700, 100, 1000000);  /* 1 sec. */
+  for (i = 0; i < 3; i++) {
+    for (j = 0; j < 2; j++) {
+      tgen_run_sendt(tgen, 700, 100, 2000000);  /* 2 sec. */
+      tgen_run_delay(tgen, 200000);  /* 200 msec. */
+    }
+    tgen_run_sendt(tgen, 700, 100, 3000000);  /* 3 sec. */
+    tgen_run_delay(tgen, 200000);  /* 200 msec. */
+  }
+  tgen_run_sendt(tgen, 700, 100, 4000000);  /* 4 sec. */
+
+  tgen_delete(tgen);
+````
+
+One downside to embedding scripts is that you need the full source package to
+make changes to the script so that it can be re-built.
+This makes it more difficult to use the tool in an ad-hoc testing or
+exploratory manner.
+I would guess that embedding scripts make the most sense for
+well-defined QA/acceptance testing.
+
+See "Instruction Set" (below) for API details.
+
 # Sending Messages
 
 Sending messages is the basic function of a traffic generator.
@@ -109,7 +194,7 @@ It's just whatever malloc returned.
 
 # Variables, Labels, and Looping
 
-The tgen package supports 26 general-purpose integer variables ('a' - 'z').
+The tgen scripting language supports 26 general-purpose integer variables ('a' - 'z').
 They are most commonly used with the "loop" instruction,
 or to communicate with the application as "special variables" (see below).
 
@@ -129,6 +214,42 @@ This is repeated 10 times.
 
 Note that the label ('a' - 'z') are a separate name space from variable ('a' - 'z').
 I.e. you can have a label 'a' and an unrelated variable 'a'.
+
+## Special Variables
+
+I wanted an easy way for a tgen script to interact with the traffic generator
+application code.
+For example, in the Ultra Messaging product,
+you can set a "loss" value that discards a specified percentage of
+outgoing datagrams.
+But this is specific to the UM product, so I didn't want to add a "loss" primitive.
+Instead, I added a general-purpose callback: 
+````
+  void my_variable_change(tgen_t *tgen, char var_id, int value);
+````
+This application callback is invoked any time any variable is changed.
+The intent is that the application will perform some action when a specific
+variable is changed.
+
+For example:
+````
+void my_variable_change(tgen_t *tgen, char var_id, int value)
+{
+  switch (var_id) {
+    /* Variable "l" controls LBT-RM loss rate. */
+    case 'l': lbm_set_lbtrm_src_loss_rate(tgen_variable_get(tgen, var_id)); break;
+  }
+}  /* my_variable_change */
+````
+
+This allows a script to change the loss rate during execution of the tgen script.
+For example:
+````
+  set l 100 # set loss to 100%
+  sendc 700 bytes 999 mpersec 1 msgs  # this message dropped.
+  set l 0 # set loss to 0%
+  sendc 700 bytes 999 mpersec 1 msgs  # this message is delivered..
+````
 
 # REPL
 
@@ -187,6 +308,11 @@ sendt 10 kbytes 30 kpersec 200 msec
 ````
 Send messages of 10,000 bytes each at a rate of 30,000 messages/sec for 200 milliseconds.
 
+API:
+````
+void tgen_run_sendt(tgen_t *tgen, int len, int rate, int duration_usec);
+````
+
 Note that the tool does not initialize the
 message contents.
 It's just whatever malloc returned.
@@ -213,6 +339,11 @@ sendc 10 kbytes 30 kpersec 200 kmsgs
 ````
 Send messages of 10,000 bytes each at a rate of 30,000 messages/sec for 200,000 messages.
 
+API:
+````
+void tgen_run_sendc(tgen_t *tgen, int len, int rate, int duration_usec);
+````
+
 Note that the tool does not initialize the
 message contents.
 It's just whatever malloc returned.
@@ -238,6 +369,11 @@ set c 0x1F
 ````
 Sets variable b to 256 and variable c to 31.
 
+API:
+````
+void tgen_run_set(tgen_t *tgen, int variable_index, int value);
+````
+
 ## Label
 
 Define a label in the script.
@@ -251,6 +387,8 @@ Example:
 ````
 label b
 ````
+
+No API available (doesn't make sense for embedded use).
 
 ## Loop
 
@@ -274,6 +412,8 @@ loop a i
 ````
 Nested loops. The delay is executed 5 * 3 = 15 times.
 
+No API available (doesn't make sense for embedded use).
+
 ## Delay
 
 Pause for a period of time.
@@ -287,6 +427,11 @@ where:
 Example:
 ````
 delay 10 msec
+````
+
+API:
+````
+void tgen_run_delay(tgen_t *tgen, int duration_usec);
 ````
 
 ## Repl
@@ -305,11 +450,19 @@ repl
 Usually used interactively,
 with EOF supplied by typing "ctrl-d".
 
+API:
+````
+void tgen_run_repl(tgen_t *tgen);
+````
+
 # TODO
 
-I want to be careful not to bloat this tool.
-Sometimes it's better to clone a tool for a new
-application.
+I want to be careful not to bloat this module.
+Little languages have a tendeny to outgrow their original designs,
+making them hard to use and maintain.
+*COUGH*perl*COUGH*
+
+That said...
 
 * It might be nice to support setting the contents
 of the messages being sent.

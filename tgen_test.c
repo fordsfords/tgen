@@ -53,19 +53,14 @@ void get_my_options(int argc, char **argv)
     fprintf(stderr, "Test number ('-t test_num') is required.\n");
     usage(1);
   }
-
-  if (o_test_num != 1 && o_script_str == NULL) {
-    fprintf(stderr, "test %d requires script\n", o_test_num);
-    usage(1);
-  }
 }  /* get_my_options */
 
 
 void my_send(tgen_t *tgen, int len)
 {
   my_data_t *my_data = (my_data_t *)tgen_user_data_get(tgen);
-  if (o_test_num > 0) {
-    CPRT_ASSERT(my_data->test_int == 314159);
+  CPRT_ASSERT(my_data->test_int == 314159);
+  if (o_test_num == 2) {
     CPRT_ASSERT(tgen_variable_get(tgen, 'z') == 271828);
   }
   fprintf(stderr, "send message %d\n", len);
@@ -75,7 +70,9 @@ void my_send(tgen_t *tgen, int len)
 void my_variable_change(tgen_t *tgen, char var_id, int value)
 {
   CPRT_ASSERT(value == tgen_variable_get(tgen, var_id));
-  fprintf(stderr, "Variable %c = %d\n", var_id, value);
+  if (o_test_num == 2) {
+    fprintf(stderr, "Variable %c = %d\n", var_id, value);
+  }
 }  /* my_variable_change */
 
 
@@ -84,8 +81,9 @@ void test0()
   my_data_t my_data;
   tgen_t *tgen;
 
-  my_data.test_int = 314159;
+  CPRT_ASSERT(o_script_str != NULL);
 
+  my_data.test_int = 314159;
   tgen = tgen_create(o_flags, &my_data);
 
   tgen_add_multi_steps(tgen, o_script_str);
@@ -121,8 +119,9 @@ void test2()
   my_data_t my_data;
   tgen_t *tgen;
 
-  my_data.test_int = 314159;
+  CPRT_ASSERT(o_script_str != NULL);
 
+  my_data.test_int = 314159;
   tgen = tgen_create(o_flags, &my_data);
 
   tgen_add_multi_steps(tgen, o_script_str);
@@ -133,6 +132,33 @@ void test2()
 }  /* test2 */
 
 
+/* Demonstrate using C code instead of script.
+ * This is the same as test6 in "tst.sh".
+ */
+void test3()
+{
+  my_data_t my_data;
+  tgen_t *tgen;
+  int i, j;
+
+  my_data.test_int = 314159;
+  tgen = tgen_create(o_flags, &my_data);
+
+  tgen_run_sendt(tgen, 700, 100, 1000000);  /* 1 sec. */
+  for (i = 0; i < 3; i++) {
+    for (j = 0; j < 2; j++) {
+      tgen_run_sendt(tgen, 700, 100, 2000000);  /* 2 sec. */
+      tgen_run_delay(tgen, 200000);  /* 200 msec. */
+    }
+    tgen_run_sendt(tgen, 700, 100, 3000000);  /* 3 sec. */
+    tgen_run_delay(tgen, 200000);  /* 200 msec. */
+  }
+  tgen_run_sendt(tgen, 700, 100, 4000000);  /* 4 sec. */
+
+  tgen_delete(tgen);
+}  /* test3 */
+
+
 int main(int argc, char **argv)
 {
   get_my_options(argc, argv);
@@ -141,6 +167,7 @@ int main(int argc, char **argv)
     case 0: test0(); break;
     case 1: test1(); break;
     case 2: test2(); break;
+    case 3: test3(); break;
 
     default: fprintf(stderr, "unknown test %d\n", o_test_num); exit(1);
   }

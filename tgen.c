@@ -294,17 +294,16 @@ int tgen_parse_step(tgen_t *tgen, char *iline, tgen_step_t *step)
  */
 
 
-void tgen_run_sendt(tgen_t *tgen, tgen_step_t *step)
+void tgen_run_sendt(tgen_t *tgen, int len, int rate, int duration_usec)
 {
-  int rate = step->rate;
-  uint64_t duration_ns = 1000 * (uint64_t)step->duration_usec;
+  uint64_t duration_ns = 1000 * (uint64_t)duration_usec;
   uint64_t ns_so_far;
   struct timespec cur_ts;
   struct timespec start_ts;
   uint64_t num_sent;
 
   if (tgen->flags & TGEN_FLAGS_TST1) {
-    fprintf(stderr, "sendt, %d %d %d\n", step->len, rate, step->duration_usec);
+    fprintf(stderr, "sendt, %d %d %d\n", len, rate, duration_usec);
     return;
   }
 
@@ -323,7 +322,7 @@ void tgen_run_sendt(tgen_t *tgen, tgen_step_t *step)
       should_have_sent = num_sent + 20;  /* Limit tight loops to 20. */
     }
     while (num_sent < should_have_sent) {
-      my_send(tgen, step->len);
+      my_send(tgen, len);
 
       num_sent++;
     }  /* while num_sent < should_have_sent */
@@ -333,24 +332,22 @@ void tgen_run_sendt(tgen_t *tgen, tgen_step_t *step)
 
   if (tgen->flags & TGEN_FLAGS_PRINT_RATE) {
     printf("sendt len=%d rate=%d duration_usec=%d, actual rate=%ld, actual msgs=%ld\n",
-        step->len, step->rate, step->duration_usec,
+        len, rate, duration_usec,
         (long)((num_sent * 1000000) / (ns_so_far / 1000)),
         (long)num_sent);
   }
 }  /* tgen_run_sendt */
 
 
-void tgen_run_sendc(tgen_t *tgen, tgen_step_t *step)
+void tgen_run_sendc(tgen_t *tgen, int len, int rate, int num_msgs)
 {
   struct timespec cur_ts;
   struct timespec start_ts;
   uint64_t num_sent;
-  int rate = step->rate;
-  int num_msgs = step->num_msgs;
   uint64_t ns_so_far;
 
   if (tgen->flags & TGEN_FLAGS_TST1) {
-    fprintf(stderr, "sendc, %d %d %d\n", step->len, rate, num_msgs);
+    fprintf(stderr, "sendc, %d %d %d\n", len, rate, num_msgs);
     return;
   }
 
@@ -372,7 +369,7 @@ void tgen_run_sendc(tgen_t *tgen, tgen_step_t *step)
       should_have_sent = num_sent + 20;  /* Limit tight loops to 20. */
     }
     while (num_sent < should_have_sent) {
-      my_send(tgen, step->len);
+      my_send(tgen, len);
 
       num_sent++;
     }  /* while num_sent < should_have_sent */
@@ -382,40 +379,39 @@ void tgen_run_sendc(tgen_t *tgen, tgen_step_t *step)
 
   if (tgen->flags & TGEN_FLAGS_PRINT_RATE) {
     printf("sendc len=%d rate=%d num_msgs=%d, actual rate=%ld\n",
-        step->len, step->rate, step->num_msgs,
+        len, rate, num_msgs,
         (long)((num_sent * 1000000) / (ns_so_far / 1000)));
   }
 }  /* tgen_run_sendc */
 
 
-void tgen_run_set(tgen_t *tgen, tgen_step_t *step)
+void tgen_run_set(tgen_t *tgen, int variable_index, int value)
 {
-  tgen->variables[step->variable_index] = step->value;
-  my_variable_change(tgen, step->variable_index + 'a', step->value);
+  tgen->variables[variable_index] = value;
+  my_variable_change(tgen, variable_index + 'a', value);
 }  /* tgen_run_set */
 
 
-void tgen_run_loop(tgen_t *tgen, tgen_step_t *step)
+void tgen_run_loop(tgen_t *tgen, int variable_index, int label_index)
 {
-  if (tgen->script->labels[step->label_index] == -1) {
-    fprintf(stderr, "tgen_run_loop: unknown label: %c\n", ('a' + step->label_index));
+  if (tgen->script->labels[label_index] == -1) {
+    fprintf(stderr, "tgen_run_loop: unknown label: %c\n", ('a' + label_index));
     CPRT_ERR_EXIT;
   }
-  int variable_index = step->variable_index;
   if (tgen->variables[variable_index] > 0) {
     tgen->variables[variable_index] --;
     my_variable_change(tgen, variable_index + 'a', tgen->variables[variable_index]);
   }
 
   if (tgen->variables[variable_index] > 0) {
-    tgen->pc = tgen->script->labels[step->label_index];
+    tgen->pc = tgen->script->labels[label_index];
   }
 }  /* tgen_run_loop */
 
 
-void tgen_run_delay(tgen_t *tgen, tgen_step_t *step)
+void tgen_run_delay(tgen_t *tgen, int duration_usec)
 {
-  uint64_t duration_ns = 1000 * (uint64_t)step->duration_usec;
+  uint64_t duration_ns = 1000 * (uint64_t)duration_usec;
   uint64_t ns_so_far;
   struct timespec cur_ts;
   struct timespec start_ts;
@@ -429,7 +425,7 @@ void tgen_run_delay(tgen_t *tgen, tgen_step_t *step)
 }  /* tgen_run_set */
 
 
-void tgen_run_repl(tgen_t *tgen, tgen_step_t *step)
+void tgen_run_repl(tgen_t *tgen)
 {
   char iline[TGEN_MAX_LINE+1];
   tgen_step_t my_step;
@@ -447,12 +443,12 @@ void tgen_run_repl(tgen_t *tgen, tgen_step_t *step)
 void tgen_run1(tgen_t *tgen, tgen_step_t *step)
 {
   switch (step->opcode) {
-  case TGEN_OPCODE_SENDT: tgen_run_sendt(tgen, step); break;
-  case TGEN_OPCODE_SENDC: tgen_run_sendc(tgen, step); break;
-  case TGEN_OPCODE_SET: tgen_run_set(tgen, step); break;
-  case TGEN_OPCODE_LOOP: tgen_run_loop(tgen, step); break;
-  case TGEN_OPCODE_DELAY: tgen_run_delay(tgen, step); break;
-  case TGEN_OPCODE_REPL: tgen_run_repl(tgen, step); break;
+  case TGEN_OPCODE_SENDT: tgen_run_sendt(tgen, step->len, step->rate, step->duration_usec); break;
+  case TGEN_OPCODE_SENDC: tgen_run_sendc(tgen, step->len, step->rate, step->num_msgs); break;
+  case TGEN_OPCODE_SET: tgen_run_set(tgen, step->variable_index, step->value); break;
+  case TGEN_OPCODE_LOOP: tgen_run_loop(tgen, step->variable_index, step->label_index); break;
+  case TGEN_OPCODE_DELAY: tgen_run_delay(tgen, step->duration_usec); break;
+  case TGEN_OPCODE_REPL: tgen_run_repl(tgen); break;
   default:
     fprintf(stderr, "tgen_run1: unknown opcode: %d\n", step->opcode);
     CPRT_ERR_EXIT;

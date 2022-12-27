@@ -82,6 +82,13 @@ void tgen_add_multi_steps(tgen_t *tgen, char *iline);
 void tgen_run(tgen_t *tgen);
 void tgen_run1(tgen_t *tgen, tgen_step_t *step);
 
+/* Functions that implement instructions. */
+void tgen_run_sendt(tgen_t *tgen, int len, int rate, int duration_usec);
+void tgen_run_sendc(tgen_t *tgen, int len, int rate, int duration_usec);
+void tgen_run_set(tgen_t *tgen, int variable_index, int value);
+void tgen_run_delay(tgen_t *tgen, int duration_usec);
+void tgen_run_repl(tgen_t *tgen);
+
 /* Functions the application must provide. */
 void my_send(tgen_t *tgen, int len);
 void my_variable_change(tgen_t *tgen, char var_id, int value);
