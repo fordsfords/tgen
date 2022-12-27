@@ -237,7 +237,7 @@ void my_variable_change(tgen_t *tgen, char var_id, int value)
 {
   switch (var_id) {
     /* Variable "l" controls LBT-RM loss rate. */
-    case 'l': lbm_set_lbtrm_src_loss_rate(tgen_variable_get(tgen, var_id)); break;
+    case 'l': lbm_set_lbtrm_src_loss_rate(value); break;
   }
 }  /* my_variable_change */
 ````
