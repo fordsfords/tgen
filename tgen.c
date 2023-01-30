@@ -298,8 +298,8 @@ void tgen_run_sendt(tgen_t *tgen, int len, int rate, int duration_usec)
 {
   uint64_t duration_ns = 1000 * (uint64_t)duration_usec;
   uint64_t ns_so_far;
-  struct timespec cur_ts;
-  struct timespec start_ts;
+  struct cprt_timespec cur_ts;
+  struct cprt_timespec start_ts;
   uint64_t num_sent;
 
   if (tgen->flags & TGEN_FLAGS_TST1) {
@@ -341,8 +341,8 @@ void tgen_run_sendt(tgen_t *tgen, int len, int rate, int duration_usec)
 
 void tgen_run_sendc(tgen_t *tgen, int len, int rate, int num_msgs)
 {
-  struct timespec cur_ts;
-  struct timespec start_ts;
+  struct cprt_timespec cur_ts;
+  struct cprt_timespec start_ts;
   uint64_t num_sent;
   uint64_t ns_so_far;
 
@@ -413,8 +413,8 @@ void tgen_run_delay(tgen_t *tgen, int duration_usec)
 {
   uint64_t duration_ns = 1000 * (uint64_t)duration_usec;
   uint64_t ns_so_far;
-  struct timespec cur_ts;
-  struct timespec start_ts;
+  struct cprt_timespec cur_ts;
+  struct cprt_timespec start_ts;
 
   CPRT_GETTIME(&start_ts);
   cur_ts = start_ts;
