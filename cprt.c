@@ -232,7 +232,7 @@ int cprt_getopt(int argc, char *const argv[], const char *optstring)
 
   argv_str = argv[cprt_optind];
 
-  argv_len = strlen(argv_str);
+  argv_len = (int)strlen(argv_str);
   if (argv_len < 2) {
     /* A single character, even if a '-', is not an option. Its an arg. */
     return EOF;
