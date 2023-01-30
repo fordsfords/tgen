@@ -127,12 +127,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\source\repos\wcprt\cprt.c" />
+    <ClCompile Include="cprt.c" />
     <ClCompile Include="tgen.c" />
     <ClCompile Include="tgen_test.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\source\repos\wcprt\cprt.h" />
+    <ClInclude Include="cprt.h" />
     <ClInclude Include="tgen.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
