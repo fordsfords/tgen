@@ -519,7 +519,7 @@ To the extent possible under law, the contributors to this project have
 waived all copyright and related or neighboring rights to this work.
 In other words, you can use this code for any purpose without any
 restrictions.  This work is published from: United States.  The project home
-is https://github.com/fordsfords/cprt
+is https://github.com/fordsfords/tgen
 
 To contact me, Steve Ford, project owner, you can find my email address
 at http://geeky-boy.com.  Can't see it?  Keep looking.
