@@ -10,6 +10,11 @@ fi
 gcc -Wall -g -o tgen_test cprt.c tgen.c tgen_test.c $LIBS
 if [ $? -ne 0 ]; then echo error in tgen.c; exit 1; fi
 
+# Update doc table of contents (see https://github.com/fordsfords/mdtoc).
+if which mdtoc.pl >/dev/null; then mdtoc.pl -b "" README.md;
+elif [ -x ../mdtoc/mdtoc.pl ]; then ../mdtoc/mdtoc.pl -b "" README.md;
+fi
+
 
 echo test1
 ./tgen_test -t 1 -f 2 2>tgen_test.2 <<__EOF__

@@ -3,29 +3,31 @@
 Utility functions to assist in the creation of a traffic generator.
 
 # Table of contents
-
-- [tgen - Traffic generator](#tgen---traffic-generator)
-- [Introduction](#introduction)
-  - [Repository](#repository)
-- [Quick Start](#quick-start)
-- [Scripting Language](#scripting-language)
-- [Embedded API](#embedded-api)
-- [Sending Messages](#sending-messages)
-- [Variables, Labels, and Looping](#variables-labels-and-looping)
-  - [Special Variables](#special-variables)
-- [REPL](#repl)
-- [Instruction Set](#instruction-set)
-  - [Comment](#comment)
-  - [Sendt](#sendt)
-  - [Sendc](#sendc)
-  - [Set](#set)
-  - [Label](#label)
-  - [Loop](#loop)
-  - [Delay](#delay)
-  - [Repl](#repl)
-- [TODO](#todo)
-- [License](#license)
-<sup>(table of contents from https://luciopaiva.com/markdown-toc/)</sup>
+<!-- mdtoc-start -->
+&DoubleRightArrow; [tgen - Traffic generator](#tgen---traffic-generator)  
+&DoubleRightArrow; [Table of contents](#table-of-contents)  
+&DoubleRightArrow; [Introduction](#introduction)  
+&nbsp;&nbsp;&DoubleRightArrow; [Repository](#repository)  
+&DoubleRightArrow; [Quick Start](#quick-start)  
+&DoubleRightArrow; [Scripting Language](#scripting-language)  
+&DoubleRightArrow; [Embedded API](#embedded-api)  
+&DoubleRightArrow; [Sending Messages](#sending-messages)  
+&DoubleRightArrow; [Variables, Labels, and Looping](#variables-labels-and-looping)  
+&nbsp;&nbsp;&DoubleRightArrow; [Special Variables](#special-variables)  
+&DoubleRightArrow; [REPL](#repl)  
+&DoubleRightArrow; [Instruction Set](#instruction-set)  
+&nbsp;&nbsp;&DoubleRightArrow; [Comment](#comment)  
+&nbsp;&nbsp;&DoubleRightArrow; [Sendt](#sendt)  
+&nbsp;&nbsp;&DoubleRightArrow; [Sendc](#sendc)  
+&nbsp;&nbsp;&DoubleRightArrow; [Set](#set)  
+&nbsp;&nbsp;&DoubleRightArrow; [Label](#label)  
+&nbsp;&nbsp;&DoubleRightArrow; [Loop](#loop)  
+&nbsp;&nbsp;&DoubleRightArrow; [Delay](#delay)  
+&nbsp;&nbsp;&DoubleRightArrow; [Repl](#repl)  
+&DoubleRightArrow; [TODO](#todo)  
+&DoubleRightArrow; [License](#license)  
+<!-- TOC created by '../mdtoc/mdtoc.pl README.md' (see https://github.com/fordsfords/mdtoc) -->
+<!-- mdtoc-end -->
 
 # Introduction
 
