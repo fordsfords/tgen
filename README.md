@@ -4,28 +4,28 @@ Utility functions to assist in the creation of a traffic generator.
 
 # Table of contents
 <!-- mdtoc-start -->
-&DoubleRightArrow; [tgen - Traffic generator](#tgen---traffic-generator)  
-&DoubleRightArrow; [Table of contents](#table-of-contents)  
-&DoubleRightArrow; [Introduction](#introduction)  
-&nbsp;&nbsp;&DoubleRightArrow; [Repository](#repository)  
-&DoubleRightArrow; [Quick Start](#quick-start)  
-&DoubleRightArrow; [Scripting Language](#scripting-language)  
-&DoubleRightArrow; [Embedded API](#embedded-api)  
-&DoubleRightArrow; [Sending Messages](#sending-messages)  
-&DoubleRightArrow; [Variables, Labels, and Looping](#variables-labels-and-looping)  
-&nbsp;&nbsp;&DoubleRightArrow; [Special Variables](#special-variables)  
-&DoubleRightArrow; [REPL](#repl)  
-&DoubleRightArrow; [Instruction Set](#instruction-set)  
-&nbsp;&nbsp;&DoubleRightArrow; [Comment](#comment)  
-&nbsp;&nbsp;&DoubleRightArrow; [Sendt](#sendt)  
-&nbsp;&nbsp;&DoubleRightArrow; [Sendc](#sendc)  
-&nbsp;&nbsp;&DoubleRightArrow; [Set](#set)  
-&nbsp;&nbsp;&DoubleRightArrow; [Label](#label)  
-&nbsp;&nbsp;&DoubleRightArrow; [Loop](#loop)  
-&nbsp;&nbsp;&DoubleRightArrow; [Delay](#delay)  
-&nbsp;&nbsp;&DoubleRightArrow; [Repl](#repl)  
-&DoubleRightArrow; [TODO](#todo)  
-&DoubleRightArrow; [License](#license)  
+&bull; [tgen - Traffic generator](#tgen---traffic-generator)  
+&bull; [Table of contents](#table-of-contents)  
+&bull; [Introduction](#introduction)  
+&nbsp;&nbsp;&nbsp;&nbsp;&bull; [Repository](#repository)  
+&bull; [Quick Start](#quick-start)  
+&bull; [Scripting Language](#scripting-language)  
+&bull; [Embedded API](#embedded-api)  
+&bull; [Sending Messages](#sending-messages)  
+&bull; [Variables, Labels, and Looping](#variables-labels-and-looping)  
+&nbsp;&nbsp;&nbsp;&nbsp;&bull; [Special Variables](#special-variables)  
+&bull; [REPL](#repl)  
+&bull; [Instruction Set](#instruction-set)  
+&nbsp;&nbsp;&nbsp;&nbsp;&bull; [Comment](#comment)  
+&nbsp;&nbsp;&nbsp;&nbsp;&bull; [Sendt](#sendt)  
+&nbsp;&nbsp;&nbsp;&nbsp;&bull; [Sendc](#sendc)  
+&nbsp;&nbsp;&nbsp;&nbsp;&bull; [Set](#set)  
+&nbsp;&nbsp;&nbsp;&nbsp;&bull; [Label](#label)  
+&nbsp;&nbsp;&nbsp;&nbsp;&bull; [Loop](#loop)  
+&nbsp;&nbsp;&nbsp;&nbsp;&bull; [Delay](#delay)  
+&nbsp;&nbsp;&nbsp;&nbsp;&bull; [Repl](#repl)  
+&bull; [TODO](#todo)  
+&bull; [License](#license)  
 <!-- TOC created by '../mdtoc/mdtoc.pl README.md' (see https://github.com/fordsfords/mdtoc) -->
 <!-- mdtoc-end -->
 
@@ -507,21 +507,13 @@ https://3e8.org/pub/scheme/doc/Universal%20Scripting%20Framework%20(Lambda%20as%
 
 # License
 
-I want there to be NO barriers to using this code,
-so I am releasing it to the public domain.
-But "public domain" does not have an internationally agreed upon definition,
-so I use CC0:
+I want there to be NO barriers to using this code, so I am releasing it to the public domain.  But "public domain" does not have an internationally agreed upon definition, so I use CC0:
 
-Copyright 2022-2022 Steven Ford http://geeky-boy.com and licensed
-"public domain" style under
-[CC0](http://creativecommons.org/publicdomain/zero/1.0/):
-![CC0](https://licensebuttons.net/p/zero/1.0/88x31.png "CC0")
+This work is dedicated to the public domain under CC0 1.0 Universal:
+http://creativecommons.org/publicdomain/zero/1.0/
 
-To the extent possible under law, the contributors to this project have
-waived all copyright and related or neighboring rights to this work.
-In other words, you can use this code for any purpose without any
-restrictions.  This work is published from: United States.  The project home
-is https://github.com/fordsfords/tgen
-
-To contact me, Steve Ford, project owner, you can find my email address
-at http://geeky-boy.com.  Can't see it?  Keep looking.
+To the extent possible under law, Steven Ford has waived all copyright
+and related or neighboring rights to this work. In other words, you can 
+use this code for any purpose without any restrictions.
+This work is published from: United States.
+Project home: https://github.com/fordsfords/tgen
